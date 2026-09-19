@@ -1,60 +1,69 @@
 const students=require("../database/students");
+const Student=require("../models/student.model");
 
-exports.getAllStudents=(req,res)=>{
+exports.getAllStudents=async(req,res)=>{
+    const students= await Student.find();
     res.json({
         message:"Get all students",
         students
     });
 };
-exports.getStudentById=(req,res)=>{
+exports.getStudentById=async (req,res)=>{
     const id=Number(req.params.id);
-    const student=students.find(student=>student.id===id);
+    const student= await Student.findById(id);
+    if(!student){
+        res.json({
+            message:"Student not found"
+        });
+    }
     res.json({
         message:"Get students by id",
         student
     });
 };
-exports.createStudent=(req,res)=>{
+exports.createStudent=async(req,res)=>{
     const {name,age,department,cgpa,email}=req.body;
-    const newStudent={
-        id:students.length+1,
-        name:name,
-        age:age,
-        department:department,
-        cgpa:cgpa,
-        email:email
-    };
-    students.push(newStudent);
+    const student= await Student.create({
+        name,
+        age,
+        department,
+        cgpa,
+        email
+    });
     res.json({
         message:"student added successfully",
-        students    
+        student
     });
 };
-exports.updateStudent=(req,res)=>{
+exports.updateStudent=async(req,res)=>{
     const id=Number(req.params.id);
-    const student=students.find(student=>student.id===id);
-    if(student){
-        const {name,age,department,cgpa,email}=req.body;
-        student.name=name,
-        student.age=age,
-        student.department=department,
-        student.cgpa=cgpa,
-        student.email=email
-    };    
+    const student= await Student.findByIdAndUpdate(
+        id,
+        req.body,
+        {new:true}
+
+    );
+    if(!student){
+        res.json({
+            message:"Student not found"
+        });
+    }
+    res.json({
+        message:"student updated successfully",
+        student
+    });   
 };
-exports.deleteStudent=(req,res)=>{
+exports.deleteStudent=async(req,res)=>{
     const id=Number(req.params.id);
-    const index=students.findIndex(student=>student.id===id);
-    if(index!=-1){
-        students.splice(index,1);
+    const student= await Student.findByIdAndDelete(id);
+    if(!student){
         res.json({
-            message:"deleted successfully"
+            message:"Student not found"
         });
     }
-    else{
-        res.json({
-            message:"student not found"
-        });
-    }
+    res.json({
+        message:"Student deleted successfully",
+        student
+    });
 };
 
